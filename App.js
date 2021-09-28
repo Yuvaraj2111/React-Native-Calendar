@@ -1,43 +1,92 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Image } from 'react-native';
-import DateTime from 'react-native-customize-selected-date'
-import _ from 'lodash'
-const App = () => {
-  const [time, setTime] = useState('')
-  function onChangeDate(date) {
-    alert(date)
-  }
+import {
+  StyleSheet,
+  ScrollView,
+  Alert,
+  Linking,
+  View,
+  Text,
+  Button
+} from 'react-native';
+import { Calendar } from 'react-native-calendars';
+import InModal from './components/modal';
 
-  function renderChildDay(day) {
-    if (_.includes(['2018-11-15', '2018-12-10', '2018-12-20'], day)) {
-      return <Image source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} style={styles.icLockRed} />
-    }
-    if (_.includes(['2018-11-16', '2018-12-12', '2018-12-21', '2018-12-18'], day)) {
-      return <Image source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} style={styles.icLockRed} />
-    }
-  }
+const App = () => {
+  const [mark, setMark] = useState({})
+  const [modalVisible, setModalVisible] = useState(false);
+  const [date, setDate] = useState("")
+  const OpenWEB = () => {
+    Linking.openURL("https://www.google.com/");
+  };
+  const OpenMail = () => {
+    Linking.openURL("https://mail.google.com/");
+  };
   return (
-    <View style={styles.container}>
-      <DateTime
-        date={time}
-        changeDate={(date) => onChangeDate(date)}
-        format='YYYY-MM-DD'
-        renderChildDay={(day) => renderChildDay(day)}
+    <ScrollView style={styles.container}>
+
+      <Calendar
+        style={styles.calendar}
+        allowRangeSelection={true}
+        displayLoadingIndicator
+        markingType={'period'}
+        theme={{
+          calendarBackground: '#333248',
+          textSectionTitleColor: 'white',
+          dayTextColor: 'red',
+          todayTextColor: 'white',
+          selectedDayTextColor: 'white',
+          monthTextColor: 'white',
+          selectedDayBackgroundColor: '#ffffff',
+          arrowColor: 'white',
+          'stylesheet.calendar.header': {
+            week: {
+              marginTop: 5,
+              flexDirection: 'row',
+              justifyContent: 'space-between'
+            }
+          }
+        }}
+        onDayLongPress={e => {
+          setDate(e.dateString)
+          setModalVisible(true)
+        }}
+        enableSwipeMonths={true}
+        onDayPress={e => {
+          let message = mark[e.dateString] ? mark[e.dateString]?.msg : "No remainder"
+          return (Alert.alert('Remainder', message))
+        }}
+        markedDates={mark}
+        hideArrows={false}
       />
-    </View>
-  )
+      <Button onPress={OpenWEB} title="Open web" />
+      <Button onPress={OpenMail} title="Open mail" color="#999" />
+
+      <InModal modalVisible={modalVisible} setModalVisible={setModalVisible} date={date} mark={mark} setMark={setMark} />
+    </ScrollView>
+  );
 }
+
+
 const styles = StyleSheet.create({
+  calendar: {
+    borderTopWidth: 1,
+    marginTop: '50%',
+    paddingTop: 5,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+    height: 350
+  },
+  text: {
+    textAlign: 'center',
+    borderColor: '#bbb',
+    padding: 10,
+    backgroundColor: '#eee',
+    fontSize: 25,
+    fontWeight: 'bold'
+  },
   container: {
     flex: 1,
-    justifyContent: 'center'
-  },
-  icLockRed: {
-    width: 13 / 2,
-    height: 9,
-    position: 'absolute',
-    top: 2,
-    left: 1
+    backgroundColor: 'gray',
   }
 });
 export default App;
